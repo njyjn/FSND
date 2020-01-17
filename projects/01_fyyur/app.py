@@ -117,7 +117,13 @@ def venues():
   q = Venue.query
   areas = q.distinct(Venue.city, Venue.state).options(load_only('city', 'state')).order_by('state','city').all()
   for area in areas:
-    venues = q.filter_by(city=area.city, state=area.state).all()
+    venues = (
+      q.add_columns(Venue.id, Venue.name, func.count(Show.venue_id).label('num_upcoming_shows'))
+        .join(Show, and_(Venue.id==Show.venue_id, Show.datetime >= func.now()), full=True)
+        .group_by(Venue.id)
+        .filter(Venue.city==area.city, Venue.state==area.state).order_by(Venue.name)
+        .all()
+    )
     data.append({
       "city": area.city,
       "state": area.state,
@@ -131,11 +137,16 @@ def search_venues():
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   search_term = request.form.get('search_term', '')
-  results = Venue.query.filter(or_(
+  results = (Venue.query.filter(or_(
     Venue.name.ilike(f'%{search_term}%'),
     Venue.city.ilike(f'%{search_term}%'),
     Venue.state.ilike(f'%{search_term}%')
-  )).all()
+    ))
+    .add_columns(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.venue_id)
+    .label('num_upcoming_shows'))
+    .join(Show, and_(Venue.id==Show.venue_id, Show.datetime >= func.now()), full=True)
+    .group_by(Venue.id).all()
+  )
   response={
     "count": len(results),
     "data": results
