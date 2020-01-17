@@ -8,7 +8,7 @@ import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import load_only
 import logging
 from logging import Formatter, FileHandler
@@ -53,7 +53,7 @@ class Venue(db.Model):
   website = db.Column(db.String(120))
   sticky_title = db.Column(db.String(120))
   sticky_message = db.Column(db.String(120))
-  shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
+  artists = db.relationship('Show', back_populates="venue")
 
 class Artist(db.Model):
   __tablename__ = 'artists'
@@ -71,16 +71,17 @@ class Artist(db.Model):
   website = db.Column(db.String(120))
   sticky_title = db.Column(db.String(120))
   sticky_message = db.Column(db.String(120))
-  shows = db.relationship('Show', backref='artist', lazy=True, cascade='all, delete-orphan')
+  venues = db.relationship('Show', back_populates='artist')
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Show(db.Model):
   __tablename__ = 'shows'
 
-  id = db.Column(db.Integer, primary_key=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
-  venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
-  datetime = db.Column(db.DateTime, nullable=False)
+  artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), primary_key=True)
+  venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), primary_key=True)
+  datetime = db.Column(db.DateTime, primary_key=True)
+  artist = db.relationship('Artist', back_populates='venues')
+  venue = db.relationship('Venue', back_populates='artists')
   
 #----------------------------------------------------------------------------#
 # Filters.
