@@ -108,6 +108,39 @@ def index():
 #  Venues
 #  ----------------------------------------------------------------
 
+@app.route('/venues')
+def venues():
+  # TODO: replace with real venues data.
+  #       num_shows should be aggregated based on number of upcoming shows per venue.
+  data = []
+  q = Venue.query
+  areas = q.distinct(Venue.city, Venue.state).options(load_only('city', 'state')).order_by('state','city').all()
+  for area in areas:
+    venues = q.filter_by(city=area.city, state=area.state).all()
+    data.append({
+      "city": area.city,
+      "state": area.state,
+      "venues": venues
+    })
+  return render_template('pages/venues.html', areas=data)
+
+@app.route('/venues/search', methods=['POST'])
+def search_venues():
+  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # seach for Hop should return "The Musical Hop".
+  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+  search_term = request.form.get('search_term', '')
+  results = Venue.query.filter(or_(
+    Venue.name.ilike(f'%{search_term}%'),
+    Venue.city.ilike(f'%{search_term}%'),
+    Venue.state.ilike(f'%{search_term}%')
+  )).all()
+  response={
+    "count": len(results),
+    "data": results
+  }
+  return render_template('pages/search_venues.html', results=response, search_term=search_term)
+
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
