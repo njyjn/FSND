@@ -90,7 +90,7 @@ class VenueForm(Form):
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'genres', validators=[],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -113,6 +113,10 @@ class VenueForm(Form):
             ('Other', 'Other'),
         ]
     )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
