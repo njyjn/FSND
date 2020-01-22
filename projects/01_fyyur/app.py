@@ -27,7 +27,6 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-# TODO: connect to a local postgresql database
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -49,8 +48,7 @@ class Venue(db.Model):
   image_link = db.Column(db.String(500))
   facebook_link = db.Column(db.String(120))
 
-  # TODO: implement any missing fields, as a database migration using Flask-Migrate
-  genres = db.Column(db.String(120))
+  genres = db.Column(db.ARRAY(db.String(120)))
   website = db.Column(db.String(120))
   sticky_title = db.Column(db.String(120))
   sticky_message = db.Column(db.String(120))
@@ -67,7 +65,7 @@ class Artist(db.Model):
   city = db.Column(db.String(120), nullable=False)
   state = db.Column(db.String(120), nullable=False)
   phone = db.Column(db.String(120), nullable=False)
-  genres = db.Column(db.String(120))
+  genres = db.Column(db.ARRAY(db.String(120)))
   image_link = db.Column(db.String(500))
   facebook_link = db.Column(db.String(120))
 
@@ -83,7 +81,7 @@ class Show(db.Model):
 
   artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), primary_key=True)
   venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), primary_key=True)
-  datetime = db.Column(db.DateTime, primary_key=True)
+  start_time = db.Column(db.DateTime, primary_key=True)
   artist = db.relationship('Artist', back_populates='venues')
   venue = db.relationship('Venue', back_populates='artists')
   
