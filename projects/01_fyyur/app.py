@@ -16,6 +16,7 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 import config
+import sys
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -54,6 +55,9 @@ class Venue(db.Model):
   sticky_title = db.Column(db.String(120))
   sticky_message = db.Column(db.String(120))
   artists = db.relationship('Show', back_populates="venue")
+
+  def __repr__(self):
+    return f'<Venue {self.id} {self.name}>'
 
 class Artist(db.Model):
   __tablename__ = 'artists'
