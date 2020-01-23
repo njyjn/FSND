@@ -5,7 +5,7 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify, abort
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_, func
@@ -211,6 +211,7 @@ def create_venue_submission():
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
   else:
     flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    abort(500)
   return render_template('pages/home.html')
 
 @app.route('/venues/<int:venue_id>', methods=['DELETE'])
@@ -286,7 +287,7 @@ def edit_artist(artist_id):
   artist = Artist.query.get(artist_id)
   if artist is None:
     flash('Artist not found')
-    return render_template('pages/home.html')
+    abort(404)
   form = ArtistForm(obj=artist)
   return render_template('forms/edit_artist.html', form=form, artist_id=artist_id)
 
