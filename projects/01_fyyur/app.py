@@ -187,17 +187,13 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   error = False
-  if request.form.get('genres'):
-    genres = request.form['genres'].split(',')
-  else:
-    genres = []
   venue = Venue(
     name = request.form['name'],
     city = request.form['city'],
     state = request.form['state'],
     address = request.form['address'], 
     phone = request.form['phone'],
-    genres = genres,
+    genres = request.form.getlist('genres'),
     website = request.form['website'],
     facebook_link = request.form['facebook_link']
   )
