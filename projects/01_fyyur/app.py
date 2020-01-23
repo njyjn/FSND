@@ -159,18 +159,13 @@ def show_venue(venue_id):
   venue = Venue.query.filter(Venue.id==venue_id).first()
   if venue is None:
     flash('Venue not found!')
-    return render_template('pages/home.html')
-  q = (Show.query
-    .add_columns(Show.start_time, Show.artist_id, Show.venue_id, Artist.id.label('artist_id'), Artist.name.label('artist_name'), Artist.image_link.label('artist_image_link'))
-    .join(Artist, Artist.id==Show.artist_id, full=True)
-  )
+    abort(404)
+  q = Show.query.filter(Show.venue_id==venue_id)
   upcoming_shows = (q
-    .filter(Show.venue_id==venue_id)
     .filter(Show.start_time >= func.now())
     .all()
   )
   past_shows = (q
-    .filter(Show.venue_id==venue_id)
     .filter(Show.start_time < func.now())
     .all()
   )
@@ -263,18 +258,13 @@ def show_artist(artist_id):
   artist = Artist.query.filter(Artist.id==artist_id).first()
   if artist is None:
     flash('Artist not found!')
-    return render_template('pages/home.html')
-  q = (Show.query
-    .add_columns(Show.start_time, Show.artist_id, Show.venue_id, Venue.id.label('venue_id'), Venue.name.label('venue_name'), Venue.image_link.label('venue_image_link'))
-    .join(Venue, Venue.id==Show.venue_id, full=True)
-  )
+    abort(404)
+  q = Show.query.filter(Show.artist_id==artist_id)
   upcoming_shows = (q
-    .filter(Show.artist_id==artist_id)
     .filter(Show.start_time >= func.now())
     .all()
   )
   past_shows = (q
-    .filter(Show.artist_id==artist_id)
     .filter(Show.start_time < func.now())
     .all()
   )
