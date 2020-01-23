@@ -32,7 +32,18 @@
 			<i class="fab fa-facebook-f"></i> {% if venue.facebook_link %}<a href="{{ venue.facebook_link }}" target="_blank">{{ venue.facebook_link }}</a>{% else %}No Facebook Link{% endif %}
 		</p>
 		<p class="edit">
-			<i class="fas fa-edit"></i> <a href="/venues/{{ venue.id }}/edit">Edit</a>
+			<i class="fas fa-edit"></i> <a href="/venues/{{ venue.id }}/edit">Edit</a> <button onclick="onDeleteButtonClick('/venues/{{ venue.id }}')"><i class="fas fa-trash"></i> Delete</button>
+			<script>
+				function onDeleteButtonClick(url) {
+					fetch(url, {
+						method: 'DELETE'
+					}).then(function(response) {
+						window.location.replace('/venues')
+					}).catch(function(err) {
+						console.error(err);
+					})
+				}
+			</script>
 		</p>
 		{% if venue.sticky_message %}
 		<div class="seeking">
