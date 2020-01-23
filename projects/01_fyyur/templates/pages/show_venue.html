@@ -32,13 +32,13 @@
 			<i class="fab fa-facebook-f"></i> {% if venue.facebook_link %}<a href="{{ venue.facebook_link }}" target="_blank">{{ venue.facebook_link }}</a>{% else %}No Facebook Link{% endif %}
 		</p>
 		<p class="edit">
-			<i class="fas fa-edit"></i> <a href="/venues/{{ venue.id }}/edit">Edit</a> <button onclick="onDeleteButtonClick('/venues/{{ venue.id }}')"><i class="fas fa-trash"></i> Delete</button>
+			<i class="fas fa-edit"></i> <a href="/venues/{{ venue.id }}/edit">Edit</a> <button onclick="onDeleteButtonClick('venues','{{ venue.id }}')"><i class="fas fa-trash"></i> Delete</button>
 			<script>
-				function onDeleteButtonClick(url) {
-					fetch(url, {
+				function onDeleteButtonClick(obj, id) {
+					fetch('/' + obj + '/' + id, {
 						method: 'DELETE'
 					}).then(function(response) {
-						window.location.replace('/venues')
+						window.location.replace('/' + obj)
 					}).catch(function(err) {
 						console.error(err);
 					})
@@ -56,7 +56,7 @@
 		</div>
 		{% else %}	
 		<p class="not-seeking">
-			<i class="fas fa-moon"></i> Not currently seeking talent
+			<i class="fas fa-moon"></i> No messages to display
 		</p>
 		{% endif %}
 	</div>

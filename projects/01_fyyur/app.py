@@ -160,22 +160,21 @@ def show_venue(venue_id):
   if venue is None:
     flash('Venue not found!')
     return render_template('pages/home.html')
-  else:
-    q = (Show.query
-      .add_columns(Show.start_time, Show.artist_id, Show.venue_id, Artist.id.label('artist_id'), Artist.name.label('artist_name'), Artist.image_link.label('artist_image_link'))
-      .join(Artist, Artist.id==Show.artist_id, full=True)
-    )
-    upcoming_shows = (q
-      .filter(Show.venue_id==venue_id)
-      .filter(Show.start_time >= func.now())
-      .all()
-    )
-    past_shows = (q
-      .filter(Show.venue_id==venue_id)
-      .filter(Show.start_time < func.now())
-      .all()
-    )
-    return render_template('pages/show_venue.html', venue=venue, upcoming_shows=upcoming_shows, past_shows=past_shows)
+  q = (Show.query
+    .add_columns(Show.start_time, Show.artist_id, Show.venue_id, Artist.id.label('artist_id'), Artist.name.label('artist_name'), Artist.image_link.label('artist_image_link'))
+    .join(Artist, Artist.id==Show.artist_id, full=True)
+  )
+  upcoming_shows = (q
+    .filter(Show.venue_id==venue_id)
+    .filter(Show.start_time >= func.now())
+    .all()
+  )
+  past_shows = (q
+    .filter(Show.venue_id==venue_id)
+    .filter(Show.start_time < func.now())
+    .all()
+  )
+  return render_template('pages/show_venue.html', venue=venue, upcoming_shows=upcoming_shows, past_shows=past_shows)
 
 #  Create Venue
 #  ----------------------------------------------------------------
@@ -218,7 +217,7 @@ def create_venue_submission():
     flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   return render_template('pages/home.html')
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<int:venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   resp = {}
   error = False
