@@ -193,7 +193,7 @@ class ArtistForm(Form):
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
-        'genres', validators=[DataRequired()],
+        'genres', validators=[],
         choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -215,6 +215,10 @@ class ArtistForm(Form):
             ('Soul', 'Soul'),
             ('Other', 'Other'),
         ]
+    )
+    website = StringField(
+        # TODO implement enum restriction
+        'website', validators=[URL()]
     )
     facebook_link = StringField(
         # TODO implement enum restriction

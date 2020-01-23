@@ -10,9 +10,11 @@
 			ID: {{ artist.id }}
 		</p>
 		<div class="genres">
+			{% if artist.genres %}
 			{% for genre in artist.genres %}
 			<span class="genre">{{ genre }}</span>
 			{% endfor %}
+			{% endif %}
 		</div>
 		<p>
 			<i class="fas fa-globe-americas"></i> {{ artist.city }}, {{ artist.state }}
@@ -25,17 +27,31 @@
 		</p>
 		<p>
 			<i class="fab fa-facebook-f"></i> {% if artist.facebook_link %}<a href="{{ artist.facebook_link }}" target="_blank">{{ artist.facebook_link }}</a>{% else %}No Facebook Link{% endif %}
-        </p>
-		{% if artist.seeking_venue %}
-		<div class="seeking">
+		</p>
+		<p class="edit">
+			<i class="fas fa-edit"></i> <a href="/artists/{{ artist.id }}/edit">Edit</a> <button onclick="onDeleteButtonClick('artists', '{{ artist.id }}')"><i class="fas fa-trash"></i> Delete</button>
+			<script>
+				function onDeleteButtonClick(obj, id) {
+					fetch('/' + obj + '/' + id, {
+						method: 'DELETE'
+					}).then(function(response) {
+						window.location.replace('/' + obj)
+					}).catch(function(err) {
+						console.error(err);
+					})
+				}
+		</script>
+		</p>	
+		{% if artist.sticky_message %}
+		<div class="sticky-title">
 			<p class="lead">Currently seeking performance venues</p>
 			<div class="description">
 				<i class="fas fa-quote-left"></i> {{ artist.seeking_description }} <i class="fas fa-quote-right"></i>
 			</div>
 		</div>
 		{% else %}	
-		<p class="not-seeking">
-			<i class="fas fa-moon"></i> Not currently seeking performance venues
+		<p class="sticky-message">
+			<i class="fas fa-moon"></i> No messages to display
 		</p>
 		{% endif %}
 	</div>
@@ -44,9 +60,9 @@
 	</div>
 </div>
 <section>
-	<h2 class="monospace">{{ artist.upcoming_shows_count }} Upcoming {% if artist.upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
+	<h2 class="monospace">{{ upcoming_shows|count }} Upcoming {% if upcoming_shows|count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{%for show in artist.upcoming_shows %}
+		{%for show in upcoming_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
 				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
@@ -58,9 +74,9 @@
 	</div>
 </section>
 <section>
-	<h2 class="monospace">{{ artist.past_shows_count }} Past {% if artist.past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
+	<h2 class="monospace">{{ past_shows|count }} Past {% if past_shows|count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{%for show in artist.past_shows %}
+		{%for show in past_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
 				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
