@@ -228,7 +228,46 @@ def delete_venue(venue_id):
     flash('Venue ' + venue.name + ' was successfully deleted!')
   else:
     flash('An error occurred. Venue could not be deleted.')
+    abort(500)
   return jsonify(resp)
+
+@app.route('/venues/<int:venue_id>/edit', methods=['GET'])
+def edit_venue(venue_id):
+  venue = Venue.query.get(venue_id)
+  if venue is None:
+    flash('Venue not found')
+    abort(404)
+  form = VenueForm(obj=venue)
+  return render_template('forms/edit_venue.html', form=form, venue_id=venue_id)
+
+@app.route('/venues/<int:venue_id>/edit', methods=['POST'])
+def edit_venue_submission(venue_id):
+  error = False
+  try:
+    Venue.query.filter(Venue.id==venue_id).update({
+      'name': request.form['name'],
+      'city': request.form['city'],
+      'state': request.form['state'],
+      'address': request.form['address'],
+      'phone': request.form['phone'],
+      'genres': request.form.getlist('genres'),
+      'website': request.form['website'],
+      'facebook_link': request.form['facebook_link']
+    })
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if not error:
+    flash('Venue ' + request.form['name'] + ' was successfully edited!')
+  else:
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be edited.')
+    abort(500)
+
+  return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -305,42 +344,9 @@ def edit_artist_submission(artist_id):
     flash('Artist ' + request.form['name'] + ' was successfully edited!')
   else:
     flash('An error occurred. Artist ' + request.form['name'] + ' could not be edited.')
+    abort(500)
 
   return redirect(url_for('show_artist', artist_id=artist_id))
-
-@app.route('/venues/<int:venue_id>/edit', methods=['GET'])
-def edit_venue(venue_id):
-  venue = Venue.query.get(venue_id)
-  form = VenueForm(obj=venue)
-  return render_template('forms/edit_venue.html', form=form, venue_id=venue_id)
-
-@app.route('/venues/<int:venue_id>/edit', methods=['POST'])
-def edit_venue_submission(venue_id):
-  error = False
-  try:
-    Venue.query.filter(Venue.id==venue_id).update({
-      'name': request.form['name'],
-      'city': request.form['city'],
-      'state': request.form['state'],
-      'address': request.form['address'], 
-      'phone': request.form['phone'],
-      'genres': request.form.getlist('genres'),
-      'website': request.form['website'],
-      'facebook_link': request.form['facebook_link']
-    })
-    db.session.commit()
-  except:
-    error = True
-    db.session.rollback()
-    print(sys.exc_info())
-  finally:
-    db.session.close()
-  if not error:
-    flash('Venue ' + request.form['name'] + ' was successfully edited!')
-  else:
-    flash('An error occurred. Venue ' + request.form['name'] + ' could not be edited.')
-
-  return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
 #  ----------------------------------------------------------------
