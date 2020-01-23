@@ -383,6 +383,7 @@ def create_artist_submission():
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
   else:
     flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    abort(500)
   return render_template('pages/home.html')
 
 
@@ -405,6 +406,28 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
+  error = False
+  show = Show(
+    artist_id = request.form['artist_id'],
+    venue_id = request.form['venue_id'],
+    start_time = request.form['start_time']
+  )
+  try:
+    db.session.add(show)
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  data = show
+  if not error:
+    flash('Show was successfully listed!')
+  else:
+    flash('An error occurred. Show could not be listed.')
+    abort(500)
+  return render_template('pages/home.html')
 
   # on successful db insert, flash success
   flash('Show was successfully listed!')
