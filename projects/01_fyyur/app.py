@@ -8,7 +8,7 @@ import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify, abort
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_, and_, func
+from sqlalchemy import or_, and_, func, asc, desc
 from sqlalchemy.orm import load_only
 import logging
 from logging import Formatter, FileHandler
@@ -17,6 +17,7 @@ from forms import *
 from flask_migrate import Migrate
 import config
 import sys
+from datetime import datetime
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -53,6 +54,7 @@ class Venue(db.Model):
   sticky_title = db.Column(db.String(120))
   sticky_message = db.Column(db.String(120))
   artists = db.relationship('Show', back_populates="venue")
+  created_ts = db.Column(db.DateTime)
 
   def __repr__(self):
     return f'<Venue {self.id} {self.name}>'
@@ -73,6 +75,8 @@ class Artist(db.Model):
   sticky_title = db.Column(db.String(120))
   sticky_message = db.Column(db.String(120))
   venues = db.relationship('Show', back_populates='artist')
+  created_ts = db.Column(db.DateTime)
+  available_booking_times = db.Column(db.ARRAY(db.DateTime), nullable=False)
 
 class Show(db.Model):
   __tablename__ = 'shows'
@@ -106,7 +110,9 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
-  return render_template('pages/home.html')
+  recent_artists = Artist.query.order_by(desc(Artist.created_ts)).limit(10).all()
+  recent_venues = Venue.query.order_by(desc(Venue.created_ts)).limit(10).all()
+  return render_template('pages/home.html', recent_artists=recent_artists, recent_venues=recent_venues)
 
 
 #  Venues
@@ -190,7 +196,8 @@ def create_venue_submission():
     phone = request.form['phone'],
     genres = request.form.getlist('genres'),
     website = request.form['website'],
-    facebook_link = request.form['facebook_link']
+    facebook_link = request.form['facebook_link'],
+    created_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
   )
   try:
     db.session.add(venue)
@@ -207,7 +214,7 @@ def create_venue_submission():
   else:
     flash('An error occurred. Venue ' + data.name + ' could not be listed.')
     abort(500)
-  return render_template('pages/home.html')
+  return redirect(url_for('index'))
 
 @app.route('/venues/<int:venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -367,7 +374,9 @@ def create_artist_submission():
     phone = request.form['phone'],
     genres = request.form.getlist('genres'),
     website = request.form['website'],
-    facebook_link = request.form['facebook_link']
+    facebook_link = request.form['facebook_link'],
+    created_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    available_booking_times = []
   )
   try:
     db.session.add(artist)
