@@ -4,16 +4,37 @@ from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
 from wtforms.validators import DataRequired, AnyOf, URL
 
 class ShowForm(Form):
-    artist_id = StringField(
-        'artist_id'
+    artist_id = SelectField(
+        'artist_id',
+        validators=[DataRequired()],
+        choices=[]
     )
-    venue_id = StringField(
-        'venue_id'
+    venue_id = SelectField(
+        'venue_id',
+        validators=[DataRequired()],
+        choices=[]
     )
     start_time = DateTimeField(
         'start_time',
         validators=[DataRequired()],
         default= datetime.today()
+    )
+
+class BookForm(Form):
+    artist_id = SelectField(
+        'artist_id',
+        validators=[DataRequired()],
+        choices=[]
+    )
+    venue_id = SelectField(
+        'venue_id',
+        validators=[DataRequired()],
+        choices=[]
+    )
+    start_time = SelectField(
+        'start_time',
+        validators=[DataRequired()],
+        choices=[]
     )
 
 class VenueForm(Form):
@@ -89,7 +110,6 @@ class VenueForm(Form):
         'image_link'
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
         'genres', validators=[],
         choices=[
             ('Alternative', 'Alternative'),
@@ -185,14 +205,13 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        'phone',
+        validators=[DataRequired()]
     )
     image_link = StringField(
         'image_link'
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
         'genres', validators=[],
         choices=[
             ('Alternative', 'Alternative'),
@@ -217,12 +236,8 @@ class ArtistForm(Form):
         ]
     )
     website = StringField(
-        # TODO implement enum restriction
         'website', validators=[URL()]
     )
     facebook_link = StringField(
-        # TODO implement enum restriction
         'facebook_link', validators=[URL()]
     )
-
-# TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM

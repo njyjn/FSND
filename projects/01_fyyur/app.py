@@ -445,12 +445,15 @@ def shows():
 def create_shows():
   # renders form. do not touch.
   form = ShowForm()
+  artist_ids = [(a.id, a.name) for a in Artist.query.all()]
+  venue_ids = [(v.id, v.name) for v in Venue.query.all()]
+  form.artist_id.choices = artist_ids
+  form.venue_id.choices = venue_ids
   return render_template('forms/new_show.html', form=form)
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
   error = False
   show = Show(
     artist_id = request.form['artist_id'],
@@ -474,12 +477,47 @@ def create_show_submission():
     abort(500)
   return render_template('pages/home.html')
 
-  # on successful db insert, flash success
-  flash('Show was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Show could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+@app.route('/shows/book')
+def book_shows():
+  form = BookForm()
+  artists = Artist.query.all()
+  artist_ids = [(a.id, a.name) for a in artists]
+  venue_ids = [(v.id, v.name) for v in Venue.query.all()]
+  available_booking_times = []
+  for a in artists:
+    for t in a.available_booking_times:
+      available_booking_times.append((t, a.name + ': ' + format_datetime(t)))
+  form.artist_id.choices = artist_ids
+  form.venue_id.choices = venue_ids
+  form.start_time.choices = available_booking_times
+  return render_template('forms/new_show.html', type='book', form=form)
+
+@app.route('/shows/create', methods=['POST'])
+def book_show_submission():
+  # called to create new shows in the db, upon submitting new show listing form
+  error = False
+  show = Show(
+    artist_id = request.form['artist_id'],
+    venue_id = request.form['venue_id'],
+    start_time = request.form['start_time']
+  )
+  try:
+    db.session.add(show)
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  data = show
+  if not error:
+    flash('Show was successfully listed!')
+  else:
+    flash('An error occurred. Show could not be listed.')
+    abort(500)
   return render_template('pages/home.html')
+
 
 @app.errorhandler(404)
 def not_found_error(error):
