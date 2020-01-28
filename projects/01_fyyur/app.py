@@ -143,11 +143,17 @@ def venues():
 def search_venues():
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  search_term = request.form.get('search_term', '')
+  search_terms = request.form.get('search_term', '').split(',')
+  search_term = search_terms[0]
+  if len(search_terms) > 1:
+    secondary_search_term = search_terms[1]
+  else:
+    secondary_search_term = search_term
   results = (Venue.query.filter(or_(
     Venue.name.ilike(f'%{search_term}%'),
     Venue.city.ilike(f'%{search_term}%'),
-    Venue.state.ilike(f'%{search_term}%')
+    Venue.state.ilike(f'%{search_term}%'),
+    Venue.state.ilike(f'%{secondary_search_term}%'),
     ))
     .add_columns(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.venue_id).label('num_upcoming_shows'))
     .join(Show, and_(Venue.id==Show.venue_id, Show.start_time >= func.now()), full=True)
@@ -287,9 +293,17 @@ def artists():
 def search_artists():
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  search_term = request.form.get('search_term', '')
+  search_terms = request.form.get('search_term', '').split(',')
+  search_term = search_terms[0]
+  if len(search_terms) > 1:
+    secondary_search_term = search_terms[1]
+  else:
+    secondary_search_term = search_term
   results = (Artist.query.filter(or_(
-    Artist.name.ilike(f'%{search_term}%')
+    Artist.name.ilike(f'%{search_term}%'),
+    Artist.city.ilike(f'%{search_term}%'),
+    Artist.state.ilike(f'%{search_term}%'),
+    Artist.state.ilike(f'%{secondary_search_term}%'),
   )).all()
   )
   response={
