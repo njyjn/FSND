@@ -32,7 +32,12 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
-
+  @app.route('/categories', methods=["GET"])
+  @cross_origin()
+  def get_categories():
+    categories = Category.query.all()
+    result = format_list(categories)
+    return jsonify(result)
 
   '''
   @TODO: 
@@ -46,6 +51,23 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+  @app.route('/questions', methods=["GET"])
+  @cross_origin()
+  def get_questions_paginated():
+    page = request.args.get('page', 1, type=int)
+    question_query = Question.query.paginate(page, QUESTIONS_PER_PAGE)
+    questions_list = format_list(question_query.items)
+
+    categories = Category.query.all()
+
+    result = {
+      "questions": questions_list,
+      "total_questions": question_query.total,
+      "current_category": "",
+      "categories": {c.id:c.type for c in categories}
+    }
+
+    return jsonify(result)
 
   '''
   @TODO: 
