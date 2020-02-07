@@ -11,3 +11,9 @@ venv
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+.lock
+*_lock.json
+.log
+.zip
+.code-workspace
