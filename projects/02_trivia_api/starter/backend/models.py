@@ -2,11 +2,22 @@ import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
+from flask_migrate import Migrate
 
 database_name = "trivia"
 database_path = "postgres://{}/{}".format('localhost:5432', database_name)
 
 db = SQLAlchemy()
+
+'''
+format_list(list)
+    returns a list with formatted objects
+'''
+def format_list(list):
+    new_list = []
+    for e in list:
+        new_list.append(e.format())
+    return new_list
 
 '''
 setup_db(app)
@@ -18,6 +29,7 @@ def setup_db(app, database_path=database_path):
     db.app = app
     db.init_app(app)
     db.create_all()
+    migrate = Migrate(app, db)
 
 '''
 Question
