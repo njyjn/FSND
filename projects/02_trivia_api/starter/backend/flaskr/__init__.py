@@ -1,10 +1,11 @@
 import os
+import sys
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 import random
 
-from models import setup_db, Question, Category, format_list
+from models import setup_db, Question, Category, format_list, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -36,7 +37,9 @@ def create_app(test_config=None):
   @cross_origin()
   def get_categories():
     categories = Category.query.all()
-    result = format_list(categories)
+    result = ({
+      "categories": {c.id:c.type for c in categories}
+    })
     return jsonify(result)
 
   '''
@@ -76,6 +79,25 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  @app.route('/questions/<int:question_id>', methods=["DELETE"])
+  @cross_origin()
+  def delete_questions(question_id):
+    try:
+      question = Question.query.get(question_id)
+      db.session.delete(question)
+      db.session.commit()
+
+      result = {
+        "success": True,
+      }
+    except:
+      db.session.rollback()
+      print(sys.exc_info)
+      abort(500)
+    finally:
+      db.session.close()
+
+    return jsonify(result)
 
   '''
   @TODO: 
@@ -141,6 +163,15 @@ def create_app(test_config=None):
           "error": 422,
           "message": "Method not allowed"
         }), 404
+
+  @app.errorhandler(500)
+  def internal_server_error(error):
+    return jsonify({
+          "success": False,
+          "error": 500,
+          "message": "Internal server error"
+        }), 500
+
 
   
   return app

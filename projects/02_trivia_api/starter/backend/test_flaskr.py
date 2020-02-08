@@ -26,7 +26,7 @@ class TriviaTestCase(unittest.TestCase):
             self.db.create_all()
     
     def tearDown(self):
-        """Executed after reach test"""
+        """Executed after each test"""
         pass
 
     def testGetCategories(self):
@@ -49,6 +49,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["questions"], test_data)
 
+    def testDeleteQuestion(self):
+        test_id = Question.query.first().id
+        response = self.client().delete("/questions/" + str(test_id), method="DELETE")
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertIsNone(Question.query.get(test_id))
 
 
 # Make the tests conveniently executable
