@@ -34,10 +34,10 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(response.data)
 
         categories = Category.query.all()
-        test_data = format_list(categories)
+        test_data = { str(c.id):c.type for c in categories }
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, test_data)
+        self.assertEqual(data["categories"], test_data)
 
     def testGetQuestionsPaginated(self):
         response = self.client().get("/questions?page=1")
@@ -59,12 +59,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIsNone(Question.query.get(test_id))
 
     def testCreateQuestion(self):
-        response = self.client().post("/questions", method="POST", data=dict(
-            question="Test Question",
-            answer="Ok",
-            category=1,
-            difficulty=1
-        ))
+        payload = json.dumps({
+            "question": "Test Question",
+            "answer": "Ok",
+            "category": "1",
+            "difficulty": 1
+        })
+        response = self.client().post("/questions", method="POST", content_type="application/json", data=payload)
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
@@ -73,6 +74,17 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["question"]["answer"], "Ok")
         self.assertEqual(data["question"]["category"], "1")
         self.assertEqual(data["question"]["difficulty"], 1)
+
+    def testSearchQuestions(self):
+        test_question = Question.query.first().question
+        payload = json.dumps({
+            "searchTerm": test_question
+        })
+        response = self.client().post("/questions/search", method="POST", content_type="application/json", data=payload)
+        questions = json.loads(response.data)["questions"]
+        question_list = [q["question"] for q in questions]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(test_question, question_list)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
