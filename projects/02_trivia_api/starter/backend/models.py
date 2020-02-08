@@ -14,10 +14,10 @@ format_list(list)
     returns a list with formatted objects
 '''
 def format_list(list):
-    new_list = []
-    for e in list:
-        new_list.append(e.format())
-    return new_list
+  new_list = []
+  for e in list:
+      new_list.append(e.format())
+  return new_list
 
 '''
 setup_db(app)

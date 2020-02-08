@@ -58,6 +58,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertIsNone(Question.query.get(test_id))
 
+    def testCreateQuestion(self):
+        response = self.client().post("/questions", method="POST", data=dict(
+            question="Test Question",
+            answer="Ok",
+            category=1,
+            difficulty=1
+        ))
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["question"]["question"], "Test Question")
+        self.assertEqual(data["question"]["answer"], "Ok")
+        self.assertEqual(data["question"]["category"], "1")
+        self.assertEqual(data["question"]["difficulty"], 1)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
