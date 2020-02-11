@@ -86,6 +86,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(test_question, question_list)
 
+    def testGetQuestionsByCategory(self):
+        test_question = Question.query.first()
+        test_category_id = test_question.category
+        test_questions = format_list(Question.query.filter_by(category=test_category_id).all())
+        response = self.client().get("/categories/" + str(test_category_id) + "/questions", method="GET")
+        questions = json.loads(response.data)["questions"]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(test_questions, questions)
+
+
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
