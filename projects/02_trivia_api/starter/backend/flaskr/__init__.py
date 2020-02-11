@@ -8,6 +8,7 @@ import random
 from models import setup_db, Question, Category, format_list, db
 
 QUESTIONS_PER_PAGE = 10
+QUESTIONS_PER_QUIZ_PLAY = 5
 
 def create_app(test_config=None):
   # create and configure the app
@@ -182,6 +183,37 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods=["POST"])
+  @cross_origin()
+  def get_next_quiz_question():
+    payload = request.get_json()
+    previous_questions = payload.get("previous_questions")
+    quiz_category = str(payload.get("quiz_category")["id"])
+
+    # Handle category 'ALL'
+    if quiz_category == '0':
+      questions_in_category = Question.query.all()
+    else:
+      questions_in_category = Question.query.filter_by(category=quiz_category).all()
+
+    # Handle instance where at first there are no previous questions
+    if len(previous_questions) == 0:
+      questions_not_asked = questions_in_category
+    else:
+      questions_not_asked = [q for q in questions_in_category for p_id in previous_questions if p_id != q.id]
+
+    # Handle instance where there are no unasked questions
+    if len(questions_not_asked) > 0:
+      random_index = random.randint(0, len(questions_not_asked)-1)
+      next_quiz_question = questions_not_asked[random_index].format()
+    else:
+      next_quiz_question = None
+
+    result = {
+      "question": next_quiz_question
+    }
+
+    return jsonify(result)
 
   '''
   @TODO: 
