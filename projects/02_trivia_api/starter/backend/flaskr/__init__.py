@@ -94,7 +94,7 @@ def create_app(test_config=None):
     except:
       db.session.rollback()
       print(sys.exc_info)
-      abort(500)
+      abort(422)
     finally:
       db.session.close()
 
@@ -131,7 +131,7 @@ def create_app(test_config=None):
     except:
       db.session.rollback()
       print(sys.exc_info)
-      abort(500)
+      abort(422)
     finally:
       db.session.close()
 
@@ -151,8 +151,10 @@ def create_app(test_config=None):
   @cross_origin()
   def search_questions():
     payload = request.get_json()
-    term = payload.get("searchTerm")
-    search_results = format_list(Question.query.filter(Question.question.ilike(f'%{term}%')).all())
+    search_term = payload.get("searchTerm")
+    if search_term is None:
+      abort(400)
+    search_results = format_list(Question.query.filter(Question.question.ilike(f'%{search_term}%')).all())
 
     result = {
       "questions": search_results,
@@ -230,7 +232,6 @@ def create_app(test_config=None):
   '''
   @TODO: 
   Create error handlers for all expected errors 
-  including 404 and 422. 
   '''
   @app.errorhandler(400)
   def bad_request(error):
@@ -248,21 +249,21 @@ def create_app(test_config=None):
           "message": "Not found"
         }), 404
 
-  @app.errorhandler(422)
+  @app.errorhandler(405)
   def method_not_allowed(error):
     return jsonify({
           "success": False,
-          "error": 422,
+          "error": 405,
           "message": "Method not allowed"
-        }), 422
+        }), 405
 
-  @app.errorhandler(500)
-  def internal_server_error(error):
+  @app.errorhandler(422)
+  def unprocessible_entity(error):
     return jsonify({
           "success": False,
-          "error": 500,
-          "message": "Internal server error"
-        }), 500
+          "error": 422,
+          "message": "Unprocessible entity"
+        }), 422
 
 
   

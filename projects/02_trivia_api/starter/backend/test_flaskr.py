@@ -95,6 +95,38 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(test_questions, questions)
 
+    def testErrorHandler400(self):
+        payload = json.dumps({
+            "term": "obama"
+        })
+        response = self.client().post("/questions/search", method="POST", content_type="application/json", data=payload)
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Bad request")
+
+    def testErrorHandler404(self):
+        response = self.client().get("/questions?page=100", method="GET")
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Not found")
+
+    def testErrorHandler405(self):
+        response = self.client().get("/questions/1", method="GET")
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Method not allowed")
+
+    def testErrorHandler422(self):
+        response = self.client().delete("/questions/1000", method="DELETE")
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "Unprocessible entity")
+
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
