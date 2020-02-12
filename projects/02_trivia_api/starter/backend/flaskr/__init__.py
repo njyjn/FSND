@@ -98,7 +98,7 @@ def create_app(test_config=None):
             result = {
                 "success": True,
             }
-        except Exception(e):
+        except Exception:
             db.session.rollback()
             print(sys.exc_info)
             abort(422)
@@ -136,7 +136,7 @@ def create_app(test_config=None):
                 "success": True,
                 "question": question.format()
             }
-        except Exception(e):
+        except Exception:
             db.session.rollback()
             print(sys.exc_info)
             abort(422)
