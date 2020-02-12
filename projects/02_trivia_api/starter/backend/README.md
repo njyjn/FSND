@@ -20,7 +20,14 @@ Once you have your virtual environment setup and running, install dependencies b
 pip install -r requirements.txt
 ```
 
-This will install all of the required packages we selected within the `requirements.txt` file.
+If you want to use a virtual environment, the Pipfile provided will cover you.
+
+```bash
+pipenv install
+pipenv shell
+```
+
+This will install all of the required packages we selected within the `requirements.txt` and `Pipfile`files.
 
 ##### Key Dependencies
 
@@ -31,7 +38,19 @@ This will install all of the required packages we selected within the `requireme
 - [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross origin requests from our frontend server. 
 
 ## Database Setup
-With Postgres running, restore a database using the trivia.psql file provided. From the backend folder in terminal run:
+With Postgres running, initialize your database using the following
+
+```bash
+createdb trivia
+```
+
+Once created, run the migration script to create the correct database schemae as follows
+
+```bash
+flask db upgrade
+```
+
+Restore the database using the trivia.psql file provided. From the backend folder in terminal run:
 ```bash
 psql trivia < trivia.psql
 ```
@@ -66,35 +85,215 @@ One note before you delve into your tasks: for each endpoint you are expected to
 8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
 
-REVIEW_COMMENT
-```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
+## Endpoints
 
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
+- GET '/categories'
+- GET '/categories/id/questions'
+- GET '/questions'
+- POST '/questions'
+- DELETE '/questions/id'
+- POST '/questions/search'
+- POST '/quizzes'
 
-GET '/categories'
+### GET '/categories'
+
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
+- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs.
+
+```json
 {'1' : "Science",
 '2' : "Art",
 '3' : "Geography",
 '4' : "History",
 '5' : "Entertainment",
 '6' : "Sports"}
-
 ```
 
+### GET '/categories/id/questions'
+
+- Fetches a list of questions which belong to the requested category
+- Request Arguments: Category ID
+- Returns: An object with three keys -- current category, questions and total questions, that contains the requested category ID, a list of questions belonging to that category, and the total number of questions in the database as values respectively
+
+```json
+{
+  "current_category": 1, 
+  "questions": [
+    {
+      "answer": "The Liver", 
+      "category": 1, 
+      "difficulty": 4, 
+      "id": 20, 
+      "question": "What is the heaviest organ in the human body?"
+    }, 
+    {
+      "answer": "Alexander Fleming", 
+      "category": 1, 
+      "difficulty": 3, 
+      "id": 21, 
+      "question": "Who discovered penicillin?"
+    }, 
+    {
+      "answer": "Blood", 
+      "category": 1, 
+      "difficulty": 4, 
+      "id": 22, 
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    }
+  ], 
+  "total_questions": 20
+}
+```
+
+### GET '/questions?page=1'
+
+- Fetches a list of all questions in the database
+- Request Arguments: None
+- Request Parameters: page
+- Returns: An object with four keys -- categories, current category ID, questions and total questions that contains a dictionary of all categories, the current category (not used by frontend, defaulting to ""), a list of all questions in the database, and the total number of questions respectively; all results pertain to the page number provided in the request paramter `page`
+
+```json
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "current_category": "", 
+  "questions": [
+    {
+      "answer": "Muhammad Ali", 
+      "category": 4, 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }, 
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }
+  ], 
+  "total_questions": 20
+}
+```
+
+### POST '/questions'
+
+- Creates a new question
+- Request Body: JSON payload containing keys for Question (string), Answer (string), Difficulty (int), Category (int). Difficulty is ranked on a scale of 1-5 from easiest to hardest
+- Returns: A response object with two keys -- success, which indicates the status of the request; and question, which returns the created question object if successful
+
+#### Input
+
+```json
+{
+  "question": "What is President Obama's first name?",
+  "answer": "Barack",
+  "difficulty": "1",
+  "category": "4"
+}
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "question": {
+    "id": 1,
+    "question": "What is President Obama's first name?",
+    "answer": "Barack",
+    "difficulty": "1",
+    "category": "4"
+  }
+}
+```
+
+### DELETE '/questions/id'
+
+- Deletes a questions by its given ID
+- Request Arguments: Question ID
+- Returns: An object with a single key, success, indicating the status of the request
+
+{
+  "success": true,
+}
+
+### POST '/questions/search'
+
+- Searches for questions based on the provided searchTerm keyword
+- Request Body: JSON payload containing key for searchTerm (string)
+- Returns: An object with three keys -- current category ID, questions and total questions that contains the current category (not used by frontend, defaulting to ""), a list of all questions matching the provided searchTerm keyword, and the total number of questions respectively
+
+#### Input
+
+```json
+{
+  "searchTerm": "Obama"
+}
+```
+
+#### Response
+
+```json
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is President Obama's first name?",
+      "answer": "Barack",
+      "difficulty": "1",
+      "category": "4"
+    }
+  ],
+  "currentCategory": "",
+  "totalQuestions": 20
+}
+```
+
+### POST '/quizzes'
+
+- Retrieves a random question based on the current category and a list of IDs of questions which have already been played within the same session
+- Request Body: JSON payload containing two keys -- current category ID (int) and a list of question IDs ([int])
+- Returns: A question object, or `null` if all questions have been asked within the maximum playable limit
+
+#### Input
+
+```json
+{
+  "previous_questions": [1,2,3,4],
+  "quiz_category": 4
+}
+```
+
+#### Response
+
+```json
+{
+  "question": {
+    "id": 5,
+    "question": "What is President Obama's first name?",
+    "answer": "Barack",
+    "difficulty": "1",
+    "category": "4"
+  }
+}
+```
 
 ## Testing
+
 To run the tests, run
+
 ```
 dropdb trivia_test
 createdb trivia_test
 psql trivia_test < trivia.psql
-python test_flaskr.py
+python3 test_flaskr.py
 ```
