@@ -224,9 +224,11 @@ One note before you delve into your tasks: for each endpoint you are expected to
 - Request Arguments: Question ID
 - Returns: An object with a single key, success, indicating the status of the request
 
+```json
 {
   "success": true,
 }
+```
 
 ### POST '/questions/search'
 
