@@ -8,7 +8,6 @@ import random
 from models import setup_db, Question, Category, format_list, db
 
 QUESTIONS_PER_PAGE = 10
-QUESTIONS_PER_QUIZ_PLAY = 5
 
 
 def create_app(test_config=None):
@@ -213,8 +212,11 @@ def create_app(test_config=None):
     @cross_origin()
     def get_next_quiz_question():
         payload = request.get_json()
-        previous_questions = payload.get("previous_questions")
-        quiz_category = str(payload.get("quiz_category")["id"])
+        try:
+            previous_questions = payload.get("previous_questions")
+            quiz_category = str(payload.get("quiz_category")["id"])
+        except Exception:
+            abort(400)
 
         # Handle category 'ALL'
         if quiz_category == '0':
@@ -230,7 +232,8 @@ def create_app(test_config=None):
         else:
             questions_not_asked = ([
                 q for q in questions_in_category
-                for p_id in previous_questions if p_id != q.id])
+                if q.id not in previous_questions
+            ])
 
         # Handle instance where there are no unasked questions
         if len(questions_not_asked) > 0:

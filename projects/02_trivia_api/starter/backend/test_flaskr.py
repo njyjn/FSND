@@ -110,6 +110,33 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(test_questions, questions)
 
+    def testGetNextQuizQuestion(self):
+        test_category = Category.query.first()
+        test_questions = format_list(Question.query.filter_by(
+            category=str(test_category.id)
+        ).all())
+        previous_questions = []
+        for q in test_questions:
+            response = self.client().post(
+                "/quizzes",
+                method="POST",
+                content_type="application/json",
+                data=json.dumps(
+                    {
+                        "previous_questions": previous_questions,
+                        "quiz_category": {
+                            "type": test_category.type,
+                            "id": str(test_category.id)
+                        }
+                    }
+                )
+            )
+            next_question = json.loads(response.data).get("question")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(next_question, test_questions)
+            self.assertNotIn(next_question["id"], previous_questions)
+            previous_questions.append(next_question["id"])
+
     def testErrorHandler400(self):
         payload = json.dumps({
             "term": "obama"
