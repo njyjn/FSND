@@ -91,8 +91,7 @@ def create_app(test_config=None):
     def delete_questions(question_id):
         try:
             question = Question.query.get(question_id)
-            db.session.delete(question)
-            db.session.commit()
+            Question.delete(question)
 
             result = {
                 "success": True,
