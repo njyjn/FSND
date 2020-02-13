@@ -128,8 +128,7 @@ def create_app(test_config=None):
                 category=payload.get("category"),
                 difficulty=payload.get("difficulty")
             )
-            db.session.add(question)
-            db.session.commit()
+            Question.insert(question)
 
             result = {
                 "success": True,
