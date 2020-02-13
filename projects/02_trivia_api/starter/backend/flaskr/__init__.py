@@ -99,7 +99,7 @@ def create_app(test_config=None):
             }
         except Exception:
             db.session.rollback()
-            print(sys.exc_info)
+            print(sys.exc_info())
             abort(422)
         finally:
             db.session.close()
