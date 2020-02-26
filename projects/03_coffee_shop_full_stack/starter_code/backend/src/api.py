@@ -54,14 +54,11 @@ def get_drinks():
 @cross_origin()
 @requires_auth(permission='get:drinks-detail')
 def get_drinks_detail(jwt):
-    try:
-        drinks = Drink.query.all()
-        response = {
-            "success": True,
-            "drinks": [d.long() for d in drinks]
-        }
-    except Exception as e:
-        abort(e.status)
+    drinks = Drink.query.all()
+    response = {
+        "success": True,
+        "drinks": [d.long() for d in drinks]
+    }
     return jsonify(response)
 
 
