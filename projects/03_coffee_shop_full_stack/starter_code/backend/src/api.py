@@ -76,11 +76,14 @@ def get_drinks_detail(jwt):
 @requires_auth(permission='post:drinks')
 def post_drinks(jwt):
     payload = request.get_json()
-    print(payload.get('recipe'))
+    title = payload.get('title')
+    recipe = payload.get('recipe')
+    if type(recipe) is not list:
+        recipe = [recipe]
     try:
         drink = Drink(
-            title=payload.get('title'),
-            recipe=payload.get('recipe')
+            title=title,
+            recipe=json.dumps(recipe)
         )
         drink.insert()
         result = {
