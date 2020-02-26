@@ -19,6 +19,7 @@ def setup_db(app):
     db.app = app
     db.init_app(app)
 
+
 '''
 db_drop_and_create_all()
     drops the database tables and starts fresh
@@ -28,6 +29,15 @@ db_drop_and_create_all()
 def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
+
+
+def rollback():
+    db.session.rollback()
+
+
+def close():
+    db.session.close()
+
 
 '''
 Drink

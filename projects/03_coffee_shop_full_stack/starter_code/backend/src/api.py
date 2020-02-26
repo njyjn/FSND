@@ -1,10 +1,13 @@
 import os
+import sys
 from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 import json
 from flask_cors import CORS, cross_origin
 
-from .database.models import db_drop_and_create_all, setup_db, Drink
+from .database.models import (
+    db_drop_and_create_all, setup_db, rollback, close, Drink
+)
 from .auth.auth import AuthError, requires_auth
 
 app = Flask(__name__)
@@ -18,7 +21,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 '''
 db_drop_and_create_all()
 
-## ROUTES
+# ROUTES
 '''
 @TODO implement endpoint
     GET /drinks
