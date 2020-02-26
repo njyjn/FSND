@@ -53,7 +53,15 @@ def get_token_auth_header():
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    return permission in payload.get('permissions')
+    permissions = payload.get('permissions')
+    if permissions is None:
+        raise AuthError(
+            'Invalid auth token. Unable to locate permission scopes.', 401
+        )
+    if permission not in permissions:
+        raise AuthError(
+            'Invalid permission scope. User has insufficient privileges.', 401
+        )
 
 
 '''
@@ -115,7 +123,9 @@ def verify_decode_jwt(token):
             raise AuthError(
                 'Invalid auth header. Unable to parse auth token.', 400
             )
-    raise AuthError('Invalid header. Unable to find the appropriate key.', 400)
+    raise AuthError(
+        'Invalid auth header. Unable to find the appropriate key.', 400
+    )
 
 
 '''
