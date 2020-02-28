@@ -183,7 +183,7 @@ def unprocessable(error):
     return jsonify({
                     "success": False,
                     "error": 422,
-                    "message": "unprocessable"
+                    "message": "unprocessable entity"
                     }), 422
 
 
