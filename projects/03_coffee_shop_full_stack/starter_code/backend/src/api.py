@@ -110,6 +110,34 @@ def post_drinks(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=["PATCH"])
+@cross_origin()
+@requires_auth(permission='patch:drinks')
+def patch_drinks(jwt, id):
+    try:
+        payload = request.get_json()
+        drink = Drink.query.filter(Drink.id == id).one_or_none()
+        if drink is None:
+            abort(404)
+        if payload.get('recipe') is not None:
+            new_recipe = payload.get('recipe')
+            if type(new_recipe) is not list:
+                new_recipe = [new_recipe]
+            drink.recipe = new_recipe
+        if payload.get('title') is not None:
+            drink.title = payload.get('title')
+        drink.update()
+        result = {
+            "success": True,
+            "drinks": [drink.long()]
+        }
+    except Exception:
+        rollback()
+        print(sys.exc_info())
+        abort(422)
+    finally:
+        close()
+    return jsonify(result)
 
 
 '''
