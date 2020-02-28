@@ -150,6 +150,24 @@ def patch_drinks(jwt, id):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=["DELETE"])
+@cross_origin()
+@requires_auth(permission='delete:drinks')
+def delete_drinks(jwt, id):
+    try:
+        drink = Drink.query.get(id)
+        drink.delete()
+        result = {
+            "success": True,
+            "delete": id
+        }
+    except Exception:
+        rollback()
+        print(sys.exc_info())
+        abort(422)
+    finally:
+        close()
+    return jsonify(result)
 
 
 # Error Handling
